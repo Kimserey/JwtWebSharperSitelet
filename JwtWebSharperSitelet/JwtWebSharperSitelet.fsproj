@@ -5,9 +5,7 @@
     <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{a6c7e857-1857-44f3-8389-76b17669d190}</ProjectGuid>
-    <WebSharperProject>Site</WebSharperProject>
-    <WebProjectOutputDir>$(MSBuildThisFileDirectory)</WebProjectOutputDir>
-    <StartArguments>.. http://localhost:9000/</StartArguments>
+    <StartArguments>httproot http://localhost:9000/</StartArguments>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -18,17 +16,19 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin</OutputPath>
+    <OutputPath>bin\debug</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <OutputPath>bin</OutputPath>
+    <OutputPath>bin\release</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
+    <WebSharperProject>Site</WebSharperProject>
+    <WebProjectOutputDir>$(OutputPath)\httproot</WebProjectOutputDir>
     <OutputType>Exe</OutputType>
     <Name>JwtWebSharperSitelet</Name>
     <RootNamespace>JwtWebSharperSitelet</RootNamespace>
@@ -41,10 +41,12 @@
     <Content Include="resources/css/test-content.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="Resources.fs" />
     <Compile Include="Main.fs" />
     <Content Include="Main.html" />
     <Content Include="App.config" />
     <Content Include="packages.config" />
+    <Compile Include="EntryPoint.fs" />
   </ItemGroup>
   <Target Name="IncludeContent" BeforeTargets="Compile">
     <ItemGroup>
@@ -71,6 +73,10 @@
     </Reference>
     <Reference Include="Microsoft.Owin.FileSystems">
       <HintPath>..\packages\Microsoft.Owin.FileSystems.3.0.1\lib\net45\Microsoft.Owin.FileSystems.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.HttpListener">
+      <HintPath>..\packages\Microsoft.Owin.Host.HttpListener.3.0.1\lib\net45\Microsoft.Owin.Host.HttpListener.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Owin.Hosting">
@@ -183,6 +189,13 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.fsproj">
+      <Name>Common</Name>
+      <Project>{285c0c66-4da8-4e09-b653-4f2a02fdd8a1}</Project>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
   <!-- F# targets -->
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
@@ -201,6 +214,9 @@
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\</OutputPath>
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
