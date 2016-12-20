@@ -9,6 +9,7 @@ open WebSharper.UI.Next
 open WebSharper.UI.Next.Html
 open WebSharper.UI.Next.Server
 open Common
+open NLog
 
 type MainTemplate = Templating.Template<"Main.html">
 
@@ -18,6 +19,8 @@ module WebSite =
     open System.Collections.Generic
     open System.Security.Cryptography
     
+    let logger = LogManager.GetCurrentClassLogger()
+
     module private Rpcs =
 
         [<Rpc>]
@@ -137,6 +140,9 @@ module WebSite =
         Application.MultiPage(fun ctx endpoint -> 
             match endpoint with
             | "something" -> 
+                
+                logger.Trace("{0}", "Received something")
+
                 Content.Json "hello world"
             
             | _ -> 
