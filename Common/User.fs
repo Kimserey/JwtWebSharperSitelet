@@ -8,12 +8,19 @@ type UserAccount =
     {
         Id: UserId
         FullName: string
+        Email: string
         Password: Password
+        PasswordTimestamp : DateTime
         Enabled:bool
         CreationDate: DateTime
+        Claims: string list
     }
 and UserId = UserId of string
 and Password = Password of string
+
+type AuthenticateResult =
+    | Success of UserAccount
+    | Failure
 
 type Credentials =
     {

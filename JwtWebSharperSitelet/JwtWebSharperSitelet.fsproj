@@ -55,6 +55,9 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <StartArguments />
+  </PropertyGroup>
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Import Project="..\packages\WebSharper.3.6.18.241\build\WebSharper.targets" Condition="Exists('..\packages\WebSharper.3.6.18.241\build\WebSharper.targets')" />
@@ -69,6 +72,7 @@
     <Content Include="resources/css/test-content.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="configs.json" />
     <Compile Include="Authenticator.fs" />
     <Compile Include="Resources.fs" />
     <Compile Include="Sitelet.fs" />
@@ -80,7 +84,6 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="configs.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Storage\Storage.fsproj">
@@ -88,6 +91,10 @@
       <Project>{9874bc24-166e-4e09-9fe4-c331bdbae7a4}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <Reference Include="FSharp.Data">
+      <HintPath>..\packages\FSharp.Data.2.3.2\lib\net40\FSharp.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="HttpMultipartParser">
       <HintPath>..\packages\WebSharper.Owin.3.6.13.132\lib\net45\HttpMultipartParser.dll</HintPath>
       <Private>True</Private>

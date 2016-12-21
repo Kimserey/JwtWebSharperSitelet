@@ -35,11 +35,12 @@ module JwtToken =
     let decode key token =
         JsonConvert.DeserializeObject<JwtPayload>(Jose.JWT.Decode(token, Convert.FromBase64String(key), algorithm))
 
-type JwtMiddlewareOptions(authenticate, privateKey) =
+type JwtMiddlewareOptions(authenticate, privateKey, tokenLifeSpanInMinutes) =
     inherit AuthenticationOptions("Bearer")
 
     member val Authenticate = authenticate
     member val PrivateKey = privateKey
+    member val TokenLifeSpanInMinutes = tokenLifeSpanInMinutes
 
 type private JwtAuthenticationHandler() =
     inherit AuthenticationHandler<JwtMiddlewareOptions>()
@@ -83,13 +84,25 @@ type private JwtAuthenticationHandler() =
                 use streamReader = new StreamReader(self.Request.Body)
                 let cred = JsonConvert.DeserializeObject<Credentials>(streamReader.ReadToEnd())
                 match self.Options.Authenticate cred with
-                | Some principal ->
-                    let token = JwtToken.generate self.Options.PrivateKey principal (DateTime.UtcNow.AddDays(1.))
+                | AuthenticateResult.Success userAccount ->
+                    let (UserId name) = userAccount.Id
+                    let principal =
+                        {
+                            Identity = 
+                                {
+                                    Name = name
+                                    IsAuthenticated = true
+                                    AuthenticationType = self.Options.AuthenticationType
+                                }
+                            Claims = userAccount.Claims
+                        }
+
+                    let token = JwtToken.generate self.Options.PrivateKey principal  (DateTime.UtcNow.AddMinutes(self.Options.TokenLifeSpanInMinutes))
                     use writer = new StreamWriter(self.Response.Body)
                     self.Response.StatusCode <- 200
                     writer.WriteLine(token)
                     Task.FromResult(true)
-                | None ->
+                | AuthenticateResult.Failure ->
                     self.Response.StatusCode <- 401
                     Task.FromResult(true)
             else

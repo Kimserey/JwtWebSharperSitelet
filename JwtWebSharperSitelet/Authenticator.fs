@@ -12,6 +12,10 @@ type Authenticator(dataDir) =
         match userAccountApi.Get (UserId credentials.UserId) with
         | Some userAccount ->
             let (Password pwd) = userAccount.Password
-            Cryptography.verify pwd credentials.Password
+            if Cryptography.verify pwd credentials.Password then 
+                AuthenticateResult.Success userAccount
+            else 
+                AuthenticateResult.Failure
+        
         | None ->
-            false
+            AuthenticateResult.Failure
