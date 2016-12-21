@@ -51,7 +51,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Content Include="packages.config" />
-    <Compile Include="Principal.fs" />
+    <Compile Include="User.fs" />
     <Compile Include="Cyrptography.fs" />
     <Compile Include="JwtToken.fs" />
     <Compile Include="JwtMiddleware.fs" />

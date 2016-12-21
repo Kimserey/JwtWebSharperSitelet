@@ -69,18 +69,25 @@
     <Content Include="resources/css/test-content.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="Authenticator.fs" />
     <Compile Include="Resources.fs" />
-    <Compile Include="Main.fs" />
+    <Compile Include="Sitelet.fs" />
+    <Compile Include="EntryPoint.fs" />
     <Content Include="Main.html" />
     <Content Include="App.config" />
     <Content Include="packages.config" />
-    <Compile Include="EntryPoint.fs" />
     <None Include="NLog.xsd" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="configs.json" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Storage\Storage.fsproj">
+      <Name>Storage</Name>
+      <Project>{9874bc24-166e-4e09-9fe4-c331bdbae7a4}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="HttpMultipartParser">
       <HintPath>..\packages\WebSharper.Owin.3.6.13.132\lib\net45\HttpMultipartParser.dll</HintPath>
       <Private>True</Private>

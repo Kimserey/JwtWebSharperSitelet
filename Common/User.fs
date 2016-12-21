@@ -4,6 +4,23 @@ open System
 open System.Security
 open System.Security.Principal
 
+type UserAccount = 
+    {
+        Id: UserId
+        FullName: string
+        Password: Password
+        Enabled:bool
+        CreationDate: DateTime
+    }
+and UserId = UserId of string
+and Password = Password of string
+
+type Credentials =
+    {
+        UserId: string
+        Password: string
+    }
+
 type UserIdentity = 
     {
         Name: string

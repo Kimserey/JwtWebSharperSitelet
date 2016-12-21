@@ -4,6 +4,7 @@ open Common
 open System
 open System.Security
 open System.Security.Claims
+open System.IO
 open global.Owin
 open Microsoft.Owin
 open Microsoft.Owin.Security
@@ -14,26 +15,30 @@ open System.Threading.Tasks
 open Microsoft.Owin.Security.Infrastructure
 
 module JwtToken =
-    // TODO authenticate and generate Principal then jsn payload
 
-    let generate key (subject: string) (expiry: DateTime) =
+    // Server dictates the algorithm used for encode/decode to prevent vulnerability
+    // https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/
+    let algorithm = Jose.JwsAlgorithm.HS256
+
+    let generate key (principal: UserPrincipal) (expiry: DateTime) =
         let payload = 
             {
+                Id = Guid.NewGuid().ToString("N")
                 Issuer = "com.kimserey"
-                Subject = subject
+                Subject = principal.Identity.Name
                 Expiry = expiry
                 IssuedAtTime = DateTime.UtcNow
-                Id = Guid.NewGuid().ToString("N")
-                Principal = Unchecked.defaultof<UserPrincipal>
+                Principal = principal
             }
-        Jose.JWT.Encode(JsonConvert.SerializeObject(payload), Convert.FromBase64String(key), Jose.JwsAlgorithm.HS256);
+        Jose.JWT.Encode(JsonConvert.SerializeObject(payload), Convert.FromBase64String(key), algorithm)
 
     let decode key token =
-        JsonConvert.DeserializeObject<JwtPayload>(Jose.JWT.Decode(token, Convert.FromBase64String(key)))
+        JsonConvert.DeserializeObject<JwtPayload>(Jose.JWT.Decode(token, Convert.FromBase64String(key), algorithm))
 
-type JwtMiddlewareOptions(privateKey) =
+type JwtMiddlewareOptions(authenticate, privateKey) =
     inherit AuthenticationOptions("Bearer")
 
+    member val Authenticate = authenticate
     member val PrivateKey = privateKey
 
 type private JwtAuthenticationHandler() =
@@ -52,7 +57,19 @@ type private JwtAuthenticationHandler() =
             if payload.Expiry > DateTime.UtcNow then
                 Task.FromResult(null)
             else
-                Task.FromResult(new AuthenticationTicket(new ClaimsIdentity(payload.Principal.Identity, payload.Principal.Claims |> List.map (fun claim -> Claim(ClaimTypes.Role, claim))), new AuthenticationProperties()))
+                try 
+                    new AuthenticationTicket(
+                        new ClaimsIdentity(
+                            payload.Principal.Identity, 
+                            payload.Principal.Claims 
+                            |> List.map (fun claim -> Claim(ClaimTypes.Role, claim))), 
+                        new AuthenticationProperties()
+                    )
+                    |> Task.FromResult
+                with
+                | ex ->
+                    
+                    Task.FromResult(null)
         | _ -> 
             Task.FromResult(null)
 
@@ -62,8 +79,22 @@ type private JwtAuthenticationHandler() =
     override self.InvokeAsync() =
         match self.Request.Path.ToString() with
         | "token" -> 
-            // generate token
-            Task.FromResult(true)
+            if self.Request.ContentType = "application/json" then 
+                use streamReader = new StreamReader(self.Request.Body)
+                let cred = JsonConvert.DeserializeObject<Credentials>(streamReader.ReadToEnd())
+                match self.Options.Authenticate cred with
+                | Some principal ->
+                    let token = JwtToken.generate self.Options.PrivateKey principal (DateTime.UtcNow.AddDays(1.))
+                    use writer = new StreamWriter(self.Response.Body)
+                    self.Response.StatusCode <- 200
+                    writer.WriteLine(token)
+                    Task.FromResult(true)
+                | None ->
+                    self.Response.StatusCode <- 401
+                    Task.FromResult(true)
+            else
+                self.Response.StatusCode <- 401
+                Task.FromResult(true)
         | _ -> Task.FromResult(false)
             
 
