@@ -72,7 +72,7 @@
     <Content Include="resources/css/test-content.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="configs.json" />
+    <Compile Include="Logger.fs" />
     <Compile Include="Authenticator.fs" />
     <Compile Include="Resources.fs" />
     <Compile Include="Sitelet.fs" />
@@ -84,6 +84,7 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="configs.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Storage\Storage.fsproj">

@@ -48,7 +48,6 @@ module Store =
     let private getConnection (database: string) =
         let conn = new SQLiteConnection(database, SQLiteOpenFlags.Create, false)
         conn.CreateTable<UserAccount>() |> ignore
-        conn.CreateTable<Log>() |> ignore
         conn
     
     module LogRegistry =

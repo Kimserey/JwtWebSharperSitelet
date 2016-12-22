@@ -28,6 +28,7 @@ type SqliteLogTarget() =
             database <- value
 
     override self.Write(logEvent: LogEventInfo) =
+    //agent?
         let message = self.Layout.Render logEvent
         LogRegistry.log self.Database logEvent.TimeStamp logEvent.Level.Name logEvent.LoggerName logEvent.Message
 
@@ -35,32 +36,40 @@ type Configurations = JsonProvider<"configs.json">
 
 [<EntryPoint>]
 let main args =
-    
+
     // gets the core configurations from configs.json
     let coreCfg = Configurations.GetSample()
 
     // register logger sqlite
-    ConfigurationItemFactory.Default.Targets.RegisterDefinition("SqliteLog", typeof<SqliteLogTarget>)
+//    ConfigurationItemFactory.Default.Targets.RegisterDefinition("SqliteLog", typeof<SqliteLogTarget>)
 
     // website startup
     let startup (app: IAppBuilder) = 
-        let webSharperOptions = 
-            WebSharperOptions<_>(
-                ServerRootDirectory = coreCfg.Sitelet.RootDir,
-                Sitelet = Some WebSite.sitelet,
-                BinDirectory = coreCfg.Sitelet.BinDir,
-                Debug = true
-            )
-    
-        let authenticator = new Authenticator(Path.Combine(coreCfg.Sitelet.RootDir, coreCfg.Sitelet.DataDir))
+        try
+            Logger.instance.Trace("Startup starts.")
 
-        app.Use<JwtMiddleware>(new JwtMiddlewareOptions(authenticator.Authenticate, coreCfg.Jwt.PrivateKey, float coreCfg.Jwt.TokenLifeSpanInMinutes)) 
-            .UseWebSharper(webSharperOptions)
-            .UseStaticFiles(StaticFileOptions(FileSystem = PhysicalFileSystem(coreCfg.Sitelet.RootDir)))
-            .UseStaticFiles(StaticFileOptions(FileSystem = PhysicalFileSystem("resources")))
-        |> ignore
+            let webSharperOptions = 
+                WebSharperOptions<_>(
+                    ServerRootDirectory = coreCfg.Sitelet.RootDir,
+                    Sitelet = Some WebSite.sitelet,
+                    BinDirectory = coreCfg.Sitelet.BinDir,
+                    Debug = true
+                )
+    
+            let authenticator = new Authenticator(Path.Combine(coreCfg.Sitelet.RootDir, coreCfg.Sitelet.DataDir))
+
+            app.Use<JwtMiddleware>(new JwtMiddlewareOptions(authenticator.Authenticate, coreCfg.Jwt.PrivateKey, float coreCfg.Jwt.TokenLifeSpanInMinutes)) 
+                .UseWebSharper(webSharperOptions)
+                .UseStaticFiles(StaticFileOptions(FileSystem = PhysicalFileSystem(coreCfg.Sitelet.RootDir)))
+                .UseStaticFiles(StaticFileOptions(FileSystem = PhysicalFileSystem("resources")))
+            |> ignore
+
+            Logger.instance.Trace("Startup completed.")
+        with
+        | ex -> 
+            Logger.instance.Fatal("Startup failed with unexpected error. {0}", ex.Message)
 
     use server = WebApp.Start(coreCfg.Sitelet.Url, startup)
-    stdout.WriteLine("Serving {0}", coreCfg.Sitelet.Url)
+    Logger.instance.Trace("Serving {0}", coreCfg.Sitelet.Url)
     stdin.ReadLine() |> ignore
     0
