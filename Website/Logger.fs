@@ -27,7 +27,6 @@ type SqliteLogTarget() =
             logEvent.LoggerName 
             message
 
-let instance = 
-    ConfigurationItemFactory.Default.Targets.RegisterDefinition("SqliteLog", typeof<SqliteLogTarget>)
-    LogManager.GetCurrentClassLogger()
+    static member RegisterTarget() =
+        ConfigurationItemFactory.Default.Targets.RegisterDefinition("SqliteLog", typeof<SqliteLogTarget>)
     

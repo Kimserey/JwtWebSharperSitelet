@@ -12,11 +12,15 @@ open Common.Owin
 open System.IO
 open FSharp.Data
 open Storage
+open NLog
 
 type Configurations = JsonProvider<"configs.json">
 
 [<EntryPoint>]
 let main args =
+    
+    Logger.SqliteLogTarget.RegisterTarget()
+    let logger = LogManager.GetCurrentClassLogger()
 
     // gets the core configurations from configs.json
     let coreCfg = Configurations.GetSample()
@@ -24,7 +28,7 @@ let main args =
     // website startup
     let startup (app: IAppBuilder) = 
         try
-            Logger.instance.Trace("Startup starts.")
+            logger.Trace("Startup starts.")
 
             let webSharperOptions = 
                 WebSharperOptions<_>(
@@ -42,12 +46,12 @@ let main args =
                 .UseStaticFiles(StaticFileOptions(FileSystem = PhysicalFileSystem("resources")))
             |> ignore
 
-            Logger.instance.Trace("Startup completed.")
+            logger.Trace("Startup completed.")
         with
         | ex -> 
-            Logger.instance.Fatal("Startup failed with unexpected error. {0}", ex.Message)
+            logger.Fatal("Startup failed with unexpected error. {0}", ex.Message)
 
     use server = WebApp.Start(coreCfg.Sitelet.Url, startup)
-    Logger.instance.Trace("Serving {0}", coreCfg.Sitelet.Url)
+    logger.Trace("Serving {0}", coreCfg.Sitelet.Url)
     stdin.ReadLine() |> ignore
     0

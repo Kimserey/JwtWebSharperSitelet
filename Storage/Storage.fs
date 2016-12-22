@@ -47,10 +47,14 @@ type Log =
 module LogRegistry =    
     
     let private getConnection (database: string) =
-        let conn = new SQLiteConnection(database, false)
-        conn.CreateTable<Log>() |> ignore
-        conn
-        
+        try
+            let conn = new SQLiteConnection(database, false)
+            conn.CreateTable<Log>() |> ignore
+            conn
+        with
+        | ex ->
+            failwith ex.Message
+
     let log database timestamp level logger message =
         use conn = getConnection database
         conn.Insert {
