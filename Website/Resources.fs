@@ -1,4 +1,4 @@
-﻿namespace JwtWebSharperSitelet
+﻿namespace Website
 
 open WebSharper
 open WebSharper.Resources

@@ -1,4 +1,4 @@
-﻿module JwtWebSharperSitelet.EntryPoint
+﻿module Website.EntryPoint
 
 open global.Owin
 open Microsoft.Owin

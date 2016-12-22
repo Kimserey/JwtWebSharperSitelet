@@ -1,4 +1,4 @@
-﻿namespace JwtWebSharperSitelet
+﻿namespace Website
 
 open Common
 open Storage 

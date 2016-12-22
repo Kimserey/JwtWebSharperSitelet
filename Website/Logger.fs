@@ -1,4 +1,4 @@
-module JwtWebSharperSitelet.Logger
+module Website.Logger
 
 open System
 open Common
@@ -20,7 +20,12 @@ type SqliteLogTarget() =
 
     override self.Write(logEvent: LogEventInfo) =
         let message = self.Layout.Render logEvent
-        LogRegistry.log self.Database logEvent.TimeStamp logEvent.Level.Name logEvent.LoggerName logEvent.Message
+        LogRegistry.log 
+            self.Database 
+            logEvent.TimeStamp 
+            logEvent.Level.Name 
+            logEvent.LoggerName 
+            message
 
 let instance = 
     ConfigurationItemFactory.Default.Targets.RegisterDefinition("SqliteLog", typeof<SqliteLogTarget>)

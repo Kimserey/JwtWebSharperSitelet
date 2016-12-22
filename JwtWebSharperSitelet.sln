@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "JwtWebSharperSitelet", "JwtWebSharperSitelet\JwtWebSharperSitelet.fsproj", "{A6C7E857-1857-44F3-8389-76B17669D190}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Website", "Website\Website.fsproj", "{A6C7E857-1857-44F3-8389-76B17669D190}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{285C0C66-4DA8-4E09-B653-4F2A02FDD8A1}"
 EndProject
