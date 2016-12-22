@@ -69,12 +69,12 @@ module WebSite =
                 Url:         string
                 RequestType: RequestType
                 Headers:     (string * string) [] option
-                Data:        string option
+                Data:        obj option
                 ContentType: string option
             } 
             with 
                 static member GET =
-                    { RequestType = RequestType.GET;   Url = ""; Headers = None; Data = None; ContentType = None }
+                    { RequestType = RequestType.GET;   Url = ""; Headers = None; Data = None; ContentType = Some "application/json" }
         
                 static member POST =
                     { AjaxOptions.GET with RequestType = RequestType.POST }
@@ -122,6 +122,17 @@ module WebSite =
                     ()     
             } |> Async.StartImmediate             
 
+        let getToken () =
+            async {
+                let! result = httpRequest { AjaxOptions.POST with Url = "token"; Data = Some <| box (JSON.Stringify (New [ "UserId" => "admin"; "Password" => "helloworld" ])) }
+                match result with
+                | AjaxResult.Success res ->
+                    let token = string res
+                    JS.Alert token
+                | AjaxResult.Error err ->
+                    ()
+            } |> Async.StartImmediate
+
         [<Require(typeof<Resources.TestContentCss>)>]
         let page() =
             Remoting.installBearer()
@@ -135,7 +146,8 @@ module WebSite =
                   div [ Doc.TextView token.View ] 
                   div [ Doc.TextView result.View ] 
                   div [ Doc.Button "Rpc" [] (fun () -> onClick (Var.Set token)) ]
-                  div [ Doc.Button "Ajax call" [] (fun () -> onAjaxClick (Var.Set result)) ] ]
+                  div [ Doc.Button "Ajax call" [] (fun () -> onAjaxClick (Var.Set result)) ]
+                  div [ Doc.Button "Request token" [] (fun () -> getToken()) ] ]
 
     let sitelet = 
         Application.MultiPage(fun ctx endpoint -> 

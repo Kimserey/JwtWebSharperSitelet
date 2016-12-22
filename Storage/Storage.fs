@@ -1,9 +1,12 @@
 ﻿namespace Storage
 
 open System
+open System.Linq
+open System.IO
+open System.Text
 open SQLite
-open SQLiteNetExtensions.Attributes
 open Common
+open Newtonsoft.Json
 
 [<Table("user_accounts"); CLIMutable>]
 type UserAccount =
@@ -22,9 +25,8 @@ type UserAccount =
         Enabled:bool
         [<Column("creation_date")>]
         CreationDate: DateTime
-        [<Column("claims"); TextBlob("ClaimsBlobbed")>]
-        Claims: string list
-        ClaimsBlobbed: string
+        [<Column("claims")>]
+        Claims: string
     }
     
 [<Table("logs"); CLIMutable>]
@@ -42,71 +44,71 @@ type Log =
         Message: string
     }
 
-[<AutoOpen>]
-module Store =
+module LogRegistry =    
     
     let private getConnection (database: string) =
-        let conn = new SQLiteConnection(database, SQLiteOpenFlags.Create, false)
+        let conn = new SQLiteConnection(database, false)
+        conn.CreateTable<Log>() |> ignore
+        conn
+        
+    let log database timestamp level logger message =
+        use conn = getConnection database
+        conn.Insert {
+            Id = 0
+            Timestamp = timestamp
+            Level = level
+            Logger = logger
+            Message = message
+        }
+        |> ignore
+
+module UserRegistry =
+
+    type UserRegistryApi =
+        {
+            Get: UserId -> Common.UserAccount option
+            Create: UserId -> Password -> FullName -> Email -> Claims -> unit
+        }
+    and FullName = string
+    and Email = string
+    and Claims = string list
+        
+    let private getConnection (database: string) =
+        let conn = new SQLiteConnection(database, false)
         conn.CreateTable<UserAccount>() |> ignore
         conn
-    
-    module LogRegistry =
-        
-        let log database timestamp level logger message =
-            use conn = getConnection database
-            conn.Insert {
-                Id = 0
-                Timestamp = timestamp
-                Level = level
-                Logger = logger
-                Message = message
-            }
-            |> ignore
 
-    module UserRegistry =
+    let private get database (UserId userId) =
+        use conn = getConnection database
+        let user = conn.Find<UserAccount>(userId)
+        if not <| Object.ReferenceEquals(user, Unchecked.defaultof<UserAccount>) then
+            Some ({ Id = UserId user.Id
+                    Email = user.Email
+                    FullName = user.FullName
+                    Password = Password user.Password
+                    PasswordTimestamp = user.PasswordTimestamp
+                    Enabled = user.Enabled
+                    CreationDate = user.CreationDate 
+                    Claims = JsonConvert.DeserializeObject<string list> user.Claims } : Common.UserAccount)
+        else
+            None
 
-        type UserRegistryApi =
-            {
-                Get: UserId -> Common.UserAccount option
-                Create: UserId -> Password -> FullName -> Email -> Claims -> unit
-            }
-        and FullName = string
-        and Email = string
-        and Claims = string list
+    let private create database (UserId userId) (Password pwd) (fullname: string) (email: string) (claims: string list) =
+        use conn = getConnection database
+        let timestamp = DateTime.UtcNow
+        conn.Insert 
+            ({ Id = userId
+               FullName = fullname
+               Email = email
+               Password= pwd
+               PasswordTimestamp = timestamp
+               CreationDate = timestamp
+               Enabled = true
+               Claims = JsonConvert.SerializeObject claims } : UserAccount) 
+        |> ignore
 
-        let private get database (UserId userId) =
-            use conn = getConnection database
-            let user = conn.Find<UserAccount>(userId)
-            if not <| Object.ReferenceEquals(user, Unchecked.defaultof<UserAccount>) then
-                Some ({ Id = UserId user.Id
-                        Email = user.Email
-                        FullName = user.FullName
-                        Password = Password user.Password
-                        PasswordTimestamp = user.PasswordTimestamp
-                        Enabled = user.Enabled
-                        CreationDate = user.CreationDate 
-                        Claims = user.Claims} : Common.UserAccount)
-            else
-                None
-        let private create database (UserId userId) (Password pwd) fullname email claims =
-            use conn = getConnection database
-            let timestamp = DateTime.UtcNow
-            conn.Insert 
-                { 
-                    Id = userId 
-                    FullName = fullname
-                    Email = email
-                    Password = pwd
-                    PasswordTimestamp = timestamp
-                    Enabled = true
-                    CreationDate = timestamp
-                    Claims = claims
-                    ClaimsBlobbed = Unchecked.defaultof<string>
-                } 
-            |> ignore
-
-        let api databasePath =
-            {
-                Get = get databasePath
-                Create = create databasePath
-            }
+    let api databasePath =
+        {
+            Get = get databasePath
+            Create = create databasePath
+        }

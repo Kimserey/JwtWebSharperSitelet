@@ -78,8 +78,7 @@ type private JwtAuthenticationHandler() =
     // If true, stop further processing.
     // If false, pass through to next middleware.
     override self.InvokeAsync() =
-        match self.Request.Path.ToString() with
-        | "token" -> 
+        if self.Request.Path.HasValue && self.Request.Path.Value = "/token" then
             if self.Request.ContentType = "application/json" then 
                 use streamReader = new StreamReader(self.Request.Body)
                 let cred = JsonConvert.DeserializeObject<Credentials>(streamReader.ReadToEnd())
@@ -108,7 +107,9 @@ type private JwtAuthenticationHandler() =
             else
                 self.Response.StatusCode <- 401
                 Task.FromResult(true)
-        | _ -> Task.FromResult(false)
+        
+        else
+            Task.FromResult(false)
             
 
 type JwtMiddleware(next, options) =
