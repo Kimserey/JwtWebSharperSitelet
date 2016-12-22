@@ -25,6 +25,7 @@ module WebSite =
 
         [<Rpc>]
         let token() =
+            logger.Trace("{0} - {1}", "RPC", "Request token")
             let ctx = Remoting.GetContext()
             let owinContext = unbox<OwinContext> <| ctx.Environment.["OwinContext"]
             
@@ -34,7 +35,7 @@ module WebSite =
     
 
     [<JavaScript>]
-    module private Client =
+    module private Client = 
         open WebSharper.JavaScript
         open WebSharper.JQuery
         open WebSharper.UI.Next.Client
@@ -140,12 +141,11 @@ module WebSite =
         Application.MultiPage(fun ctx endpoint -> 
             match endpoint with
             | "something" -> 
-                
-                logger.Trace("{0}", "Received something")
-
+                logger.Trace("{0} - {1}", "Endpoint", "something")
                 Content.Json "hello world"
             
             | _ -> 
+                logger.Trace("{0} - {1}", "Endpoint", "default")
                 Content.Page(
                     MainTemplate.Doc(
                         "Test", 

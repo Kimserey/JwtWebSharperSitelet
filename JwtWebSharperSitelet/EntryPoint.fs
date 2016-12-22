@@ -11,14 +11,38 @@ open WebSharper.Web
 open Common.Owin
 open System.IO
 open FSharp.Data
+open NLog
+open NLog.Config
+open NLog.Targets
+open Storage
+
+type SqliteLogTarget() =
+    inherit TargetWithLayout()
+
+    let mutable database = ""
+
+    [<RequiredParameter>]
+    member self.Database 
+        with get () = database
+        and set value = 
+            database <- value
+
+    override self.Write(logEvent: LogEventInfo) =
+        let message = self.Layout.Render logEvent
+        LogRegistry.log self.Database logEvent.TimeStamp logEvent.Level.Name logEvent.LoggerName logEvent.Message
 
 type Configurations = JsonProvider<"configs.json">
 
 [<EntryPoint>]
 let main args =
     
+    // gets the core configurations from configs.json
     let coreCfg = Configurations.GetSample()
 
+    // register logger sqlite
+    ConfigurationItemFactory.Default.Targets.RegisterDefinition("SqliteLog", typeof<SqliteLogTarget>)
+
+    // website startup
     let startup (app: IAppBuilder) = 
         let webSharperOptions = 
             WebSharperOptions<_>(

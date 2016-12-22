@@ -8,41 +8,61 @@ open Common
 [<Table("user_accounts"); CLIMutable>]
 type UserAccount =
     {
-        [<Column("id"); Unique; PrimaryKey; Collation("nocase")>]
+        [<Column "id"; PrimaryKey; Collation "nocase">]
         Id: string
-        
         [<Column("full_name")>]
         FullName: string
-        
         [<Column("email")>]
         Email: string
-
         [<Column("password")>]
         Password: string
-
         [<Column "passwordtimestamp">]                          
         PasswordTimestamp : DateTime
-        
         [<Column("enabled")>]
         Enabled:bool
-
         [<Column("creation_date")>]
         CreationDate: DateTime
-
         [<Column("claims"); TextBlob("ClaimsBlobbed")>]
         Claims: string list
-
         ClaimsBlobbed: string
     }
-
+    
+[<Table("logs"); CLIMutable>]
+type Log =
+    {
+        [<Column "id"; PrimaryKey; AutoIncrement>]
+        Id: int
+        [<Column "timestamp">]
+        Timestamp: DateTime
+        [<Column "level">]
+        Level: string
+        [<Column "logger">]
+        Logger: string
+        [<Column "message">]
+        Message: string
+    }
 
 [<AutoOpen>]
 module Store =
     
     let private getConnection (database: string) =
-        let conn = new SQLiteConnection(database, false)
+        let conn = new SQLiteConnection(database, SQLiteOpenFlags.Create, false)
         conn.CreateTable<UserAccount>() |> ignore
+        conn.CreateTable<Log>() |> ignore
         conn
+    
+    module LogRegistry =
+        
+        let log database timestamp level logger message =
+            use conn = getConnection database
+            conn.Insert {
+                Id = 0
+                Timestamp = timestamp
+                Level = level
+                Logger = logger
+                Message = message
+            }
+            |> ignore
 
     module UserRegistry =
 
