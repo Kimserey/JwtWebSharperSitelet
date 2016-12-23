@@ -55,4 +55,4 @@ type HttpSSELogTarget() =
         HttpLogAgent.Post(Log message)
 
     static member RegisterTarget() =
-        ConfigurationItemFactory.Default.Targets.RegisterDefinition("HttpLog", typeof<HttpSSELogTarget>)
+        ConfigurationItemFactory.Default.Targets.RegisterDefinition("HttpSSELog", typeof<HttpSSELogTarget>)
