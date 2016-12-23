@@ -40,7 +40,7 @@ let main args =
                     Debug = true
                 )
     
-            let authenticator = new Authenticator(Path.Combine(coreCfg.Sitelet.RootDir, coreCfg.Sitelet.DataDir))
+            let authenticator = new Authenticator(coreCfg.Sitelet.DataDir)
 
             app.Use<JwtMiddleware>(new JwtMiddlewareOptions(authenticator.Authenticate, coreCfg.Jwt.PrivateKey, float coreCfg.Jwt.TokenLifeSpanInMinutes)) 
                 .UseWebSharper(webSharperOptions)

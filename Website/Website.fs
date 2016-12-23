@@ -26,27 +26,11 @@ let sitelet =
         match endpoint with
         | Home -> 
             logger.Trace "Home"
-
-            Content.Page(
-                MainTemplate.Doc(
-                    "Test", 
-                    [ 
-                        client <@ Home.page() @> 
-                    ]
-                )
-            )
+            Content.Page(MainTemplate.Doc("Home", [ client <@ Home.page() @> ]))
             
         | Logs ->
             logger.Trace "Logs"
-
-            Content.Page(
-                MainTemplate.Doc(
-                    "Logs",
-                    [
-                        client <@ Logs.page() @>
-                    ]
-                )
-            )
+            Content.Page(MainTemplate.Doc( "Logs", [ client <@ Logs.page() @> ]))
 
         | LogEvents ->
             logger.Trace "Log events"
