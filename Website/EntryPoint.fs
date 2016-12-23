@@ -20,6 +20,7 @@ type Configurations = JsonProvider<"configs.json">
 let main args =
     
     Logger.SqliteLogTarget.RegisterTarget()
+    Logger.HttpSSELogTarget.RegisterTarget()
     let logger = LogManager.GetCurrentClassLogger()
 
     // gets the core configurations from configs.json

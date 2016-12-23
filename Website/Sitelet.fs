@@ -11,27 +11,27 @@ open WebSharper.UI.Next.Server
 open Common
 open NLog
 
+module Rpcs =
+    let logger = LogManager.GetCurrentClassLogger()
+
+    [<Rpc>]
+    let token() =
+        logger.Trace("{0} - {1}", "RPC", "Request token")
+        let ctx = Remoting.GetContext()
+        let owinContext = unbox<OwinContext> <| ctx.Environment.["OwinContext"]
+            
+        async { 
+            return ""
+        }
+    
 type MainTemplate = Templating.Template<"Main.html">
 
 module WebSite =
     open System
+    open System.IO
     open System.Collections
     open System.Collections.Generic
     open System.Security.Cryptography
-    
-    let logger = LogManager.GetCurrentClassLogger()
-
-    module private Rpcs =
-
-        [<Rpc>]
-        let token() =
-            logger.Trace("{0} - {1}", "RPC", "Request token")
-            let ctx = Remoting.GetContext()
-            let owinContext = unbox<OwinContext> <| ctx.Environment.["OwinContext"]
-            
-            async { 
-                return ""
-            }
     
 
     [<JavaScript>]
@@ -149,15 +149,18 @@ module WebSite =
                   div [ Doc.Button "Ajax call" [] (fun () -> onAjaxClick (Var.Set result)) ]
                   div [ Doc.Button "Request token" [] (fun () -> getToken()) ] ]
 
+    type Endpoint =
+    | [<EndPoint "GET /">] Home
+    | [<EndPoint "GET /logevents">] LogEvents
+
     let sitelet = 
+
         Application.MultiPage(fun ctx endpoint -> 
+            let logger = LogManager.GetCurrentClassLogger()
+
             match endpoint with
-            | "something" -> 
-                logger.Trace("{0} - {1}", "Endpoint", "something")
-                Content.Json "hello world"
-            
-            | _ -> 
-                logger.Trace("{0} - {1}", "Endpoint", "default")
+            | Home -> 
+                logger.Trace("Get home")
                 Content.Page(
                     MainTemplate.Doc(
                         "Test", 
@@ -166,4 +169,25 @@ module WebSite =
                         ]
                     )
                 )
-            )
+            
+            | LogEvents ->
+
+                logger.Trace("Get logvents")
+                Content.Custom(
+                    Status = Http.Status.Ok,
+                    Headers = 
+                        [ 
+                            Http.Header.Custom "Content-type" "text/event-stream" 
+                            Http.Header.Custom "Cache-control" "no-cache" 
+                            Http.Header.Custom "Connection" "keep-alive" 
+                        ],
+                    WriteBody = 
+                        (fun stream ->
+                            let msgs = Logger.HttpLogAgent.PostAndReply(Logger.MessageLog.GetUnread)
+                            use writer = new StreamWriter(stream)
+                            
+                            for msg in msgs do
+                                writer.WriteLine("data:" + msg + "\n\n")
+                        )
+                    )
+        )
