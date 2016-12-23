@@ -11,6 +11,7 @@ open WebSharper.Web
 open Common.Owin
 open System.IO
 open FSharp.Data
+open Website
 open Storage
 open NLog
 
@@ -34,7 +35,7 @@ let main args =
             let webSharperOptions = 
                 WebSharperOptions<_>(
                     ServerRootDirectory = coreCfg.Sitelet.RootDir,
-                    Sitelet = Some WebSite.sitelet,
+                    Sitelet = Some Root.sitelet,
                     BinDirectory = coreCfg.Sitelet.BinDir,
                     Debug = true
                 )

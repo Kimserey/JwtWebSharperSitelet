@@ -20,12 +20,13 @@ type SqliteLogTarget() =
 
     override self.Write(logEvent: LogEventInfo) =
         let message = self.Layout.Render logEvent
-        LogRegistry.log 
-            self.Database 
-            logEvent.TimeStamp 
-            logEvent.Level.Name 
-            logEvent.LoggerName 
-            message
+        ()
+//        LogRegistry.log 
+//            self.Database 
+//            logEvent.TimeStamp 
+//            logEvent.Level.Name 
+//            logEvent.LoggerName 
+//            message
 
     static member RegisterTarget() =
         ConfigurationItemFactory.Default.Targets.RegisterDefinition("SqliteLog", typeof<SqliteLogTarget>)
