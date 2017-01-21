@@ -11,11 +11,13 @@ open WebSharper.UI.Next.Html
 open WebSharper.UI.Next.Server
 open Common
 open NLog
+open Website
 
 type MainTemplate = Templating.Template<"Main.html">
 
 type Endpoint =
 | [<EndPoint "GET /">] Home
+| [<EndPoint "GET /register">] Register
 | [<EndPoint "GET /logs">] Logs
 | [<EndPoint "GET /logevents">] LogEvents
 
@@ -27,7 +29,11 @@ let sitelet =
         | Home -> 
             logger.Trace "Home"
             Content.Page(MainTemplate.Doc("Home", [ client <@ Home.page() @> ]))
-            
+
+        | Register ->
+            logger.Trace "Register"
+            Content.Page(MainTemplate.Doc("Register", [ client <@ Register.Client.page() @> ]))
+
         | Logs ->
             logger.Trace "Logs"
             Content.Page(MainTemplate.Doc( "Logs", [ client <@ Logs.page() @> ]))

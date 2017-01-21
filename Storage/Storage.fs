@@ -100,11 +100,12 @@ module UserRegistry =
     let private create database (UserId userId) (Password pwd) (fullname: string) (email: string) (claims: string list) =
         use conn = getConnection database
         let timestamp = DateTime.UtcNow
+        let hashedPwd = Cryptography.hash pwd
         conn.Insert 
             ({ Id = userId
                FullName = fullname
                Email = email
-               Password= pwd
+               Password= hashedPwd
                PasswordTimestamp = timestamp
                CreationDate = timestamp
                Enabled = true
