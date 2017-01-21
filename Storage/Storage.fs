@@ -78,7 +78,7 @@ module UserRegistry =
     and Claims = string list
         
     let private getConnection (database: string) =
-        let conn = new SQLiteConnection(database, false)
+        let conn = new SQLiteConnection(database)
         conn.CreateTable<UserAccount>() |> ignore
         conn
 

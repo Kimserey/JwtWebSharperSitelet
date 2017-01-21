@@ -33,8 +33,6 @@ let sitelet =
             Content.Page(MainTemplate.Doc( "Logs", [ client <@ Logs.page() @> ]))
 
         | LogEvents ->
-            logger.Trace "Log events"
-
             Content.Custom(
                 Status = Http.Status.Ok,
                 Headers = 
