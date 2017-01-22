@@ -80,7 +80,6 @@
     <Compile Include="Authenticator.fs" />
     <Compile Include="TokenStorage.fs" />
     <Compile Include="Resources.fs" />
-    <Compile Include="Rpcs.fs" />
     <Compile Include="Remote.fs" />
     <Compile Include="Pages.Home.fs" />
     <Compile Include="Pages.Auth.fs" />

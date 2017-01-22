@@ -51,3 +51,5 @@ type HttpSSELogTarget() =
 
     static member RegisterTarget() =
         ConfigurationItemFactory.Default.Targets.RegisterDefinition("HttpSSELog", typeof<HttpSSELogTarget>)
+
+let logger = LogManager.GetCurrentClassLogger()
