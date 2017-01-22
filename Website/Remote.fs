@@ -44,13 +44,21 @@ module AjaxHelper =
         Headers:     (string * string) [] option
         Data:        obj option
         ContentType: string option
+        DataType: JQuery.DataType
     } 
     with 
         static member GET =
-            { RequestType = RequestType.GET;   Url = ""; Headers = None; Data = None; ContentType = Some "application/json" }
+            { RequestType = RequestType.GET  
+              Url = ""
+              Headers = None; Data = None
+              ContentType = None
+              DataType = JQuery.DataType.Json }
         
         static member POST =
-            { AjaxOptions.GET with RequestType = RequestType.POST }
+            { AjaxOptions.GET 
+                with 
+                    RequestType = RequestType.POST
+                    ContentType = Some "application/json" }
     
     let httpRequest options =
         async {
@@ -61,7 +69,7 @@ module AjaxHelper =
                         let settings = JQuery.AjaxSettings(
                                         Url = options.Url,
                                         Type = options.RequestType,
-                                        DataType = JQuery.DataType.Json,
+                                        DataType = options.DataType,
                                         Success = (fun (result, _, _) ->
                                                     ok result),
                                         Error = (fun (jqXHR, _, _) ->

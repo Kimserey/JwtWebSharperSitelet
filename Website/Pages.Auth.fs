@@ -49,7 +49,13 @@ module Auth =
         module Service =
             let login (cred: Credentials) =
                 async {
-                    let! result = httpRequest { AjaxOptions.POST with Url = "token"; Data = Some <| box (JSON.Stringify cred) }
+                    let! result = 
+                        httpRequest 
+                            { AjaxOptions.POST 
+                                with 
+                                    Url = "token"
+                                    DataType = JQuery.DataType.Text
+                                    Data = Some <| box (JSON.Stringify cred) }
                     match result with
                     | AjaxResult.Success res ->
                         let token = string res
@@ -88,11 +94,11 @@ module Auth =
             form
                 [ h3 [ text "Register" ]
                   registerMessage |> Message.Embbed
-                  Doc.Input [ attr.``class`` "form-control"; attr.placeholder "UserId" ] (data.Lens (fun x -> x.UserId) (fun x n -> { x with UserId = n }))
-                  Doc.Input [ attr.``class`` "form-control"; attr.placeholder "Password"; attr.``type`` "password" ] (data.Lens (fun x -> x.Password) (fun x n -> { x with Password = n }))
-                  Doc.Input [ attr.``class`` "form-control"; attr.placeholder "Fullname" ] (data.Lens (fun x -> x.Fullname) (fun x n -> { x with Fullname = n }))
-                  Doc.Input [ attr.``class`` "form-control"; attr.placeholder "Email"; attr.``type`` "email" ] (data.Lens (fun x -> x.Email) (fun x n -> { x with Email = n }))
-                  Doc.Input [ attr.``class`` "form-control"; attr.placeholder "Claims comma separated" ] (data.Lens (fun x -> x.Claims |> String.concat ",") (fun x n -> { x with Claims = n.Split(',') |> Array.map (fun str -> str.Trim()) |> Array.toList })) 
+                  Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "UserId" ] (data.Lens (fun x -> x.UserId) (fun x n -> { x with UserId = n }))
+                  Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "Password"; attr.``type`` "password" ] (data.Lens (fun x -> x.Password) (fun x n -> { x with Password = n }))
+                  Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "Fullname" ] (data.Lens (fun x -> x.Fullname) (fun x n -> { x with Fullname = n }))
+                  Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "Email"; attr.``type`` "email" ] (data.Lens (fun x -> x.Email) (fun x n -> { x with Email = n }))
+                  Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "Claims comma separated" ] (data.Lens (fun x -> x.Claims |> String.concat ",") (fun x n -> { x with Claims = n.Split(',') |> Array.map (fun str -> str.Trim()) |> Array.toList })) 
                   Doc.Button "Create"
                     [ attr.``class`` "btn btn-primary"; attr.``type`` "submit" ] 
                     (fun () -> 
@@ -112,21 +118,21 @@ module Auth =
                     
             form
                 [ h3 [ text "Log in" ]
-                  Doc.Input [ attr.``class`` "form-control"; attr.placeholder "UserId" ] (cred.Lens (fun x -> x.UserId) (fun x n -> { x with UserId = n }))
-                  Doc.Input [ attr.``class`` "form-control"; attr.placeholder "Password"; attr.``type`` "password" ] (cred.Lens (fun x -> x.Password) (fun x n -> { x with Password = n }))
+                  Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "UserId" ] (cred.Lens (fun x -> x.UserId) (fun x n -> { x with UserId = n }))
+                  Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "Password"; attr.``type`` "password" ] (cred.Lens (fun x -> x.Password) (fun x n -> { x with Password = n }))
                   Doc.Button "Log In" [ attr.``class`` "btn btn-primary"; attr.style "submit" ] (fun () -> Service.login cred.Value) ]
 
         let page()=
             divAttr
                 [ attr.``class`` "container" ]
                 [ divAttr
-                    [ attr.``class`` "card" ]
+                    [ attr.``class`` "card my-3" ]
                     [ divAttr
                         [ attr.``class`` "card-block" ]
                         [ login() ] ]
                         
                   divAttr
-                    [ attr.``class`` "card" ]
+                    [ attr.``class`` "card my-3" ]
                     [ divAttr
                         [ attr.``class`` "card-block" ]
                         [ register() ] ] ]
