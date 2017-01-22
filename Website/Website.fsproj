@@ -76,7 +76,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="Logger.fs" />
+    <Compile Include="Navigator.fs" />
     <Compile Include="Authenticator.fs" />
+    <Compile Include="TokenStorage.fs" />
     <Compile Include="Resources.fs" />
     <Compile Include="Rpcs.fs" />
     <Compile Include="Remote.fs" />

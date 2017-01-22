@@ -47,7 +47,12 @@ module Auth =
         open AjaxHelper
         
         module Service =
-            let login (cred: Credentials) =
+            
+            type GetTokenResult =
+                | Success of token: string
+                | Failure of msg: string
+            
+            let getToken (cred: Credentials) =
                 async {
                     let! result = 
                         httpRequest 
@@ -59,10 +64,10 @@ module Auth =
                     match result with
                     | AjaxResult.Success res ->
                         let token = string res
-                        JS.Alert token
+                        return GetTokenResult.Success token
                     | AjaxResult.Error err ->
-                        ()
-                } |> Async.StartImmediate
+                        return Failure "Failed to get token"
+                }
 
 
         type Message =
@@ -70,15 +75,14 @@ module Auth =
             | Failure of string
             | Empty
             with
-                static member Embbed (x: Var<Message>) = 
-                    x.View
-                    |> Doc.BindView (
+                static member Embbed (x: View<Message>) = 
+                    x |> Doc.BindView (
                         function 
                         | Success str -> divAttr [ attr.``class`` "alert alert-success" ] [ text str ] :> Doc
                         | Failure str -> divAttr [ attr.``class`` "alert alert-danger" ] [ text str ] :> Doc
                         | Empty -> Doc.Empty)
 
-        let register() =
+        let register () =
             let registerMessage = 
                 Var.Create Empty
 
@@ -93,7 +97,7 @@ module Auth =
             
             form
                 [ h3 [ text "Register" ]
-                  registerMessage |> Message.Embbed
+                  registerMessage.View |> Message.Embbed
                   Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "UserId" ] (data.Lens (fun x -> x.UserId) (fun x n -> { x with UserId = n }))
                   Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "Password"; attr.``type`` "password" ] (data.Lens (fun x -> x.Password) (fun x n -> { x with Password = n }))
                   Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "Fullname" ] (data.Lens (fun x -> x.Fullname) (fun x n -> { x with Fullname = n }))
@@ -110,7 +114,12 @@ module Auth =
                                 registerMessage.Value <- Failure "Failed to create user."
                         } |> Async.StartImmediate) :> Doc ]
 
-        let login() =
+        open Service
+
+        let login (navigator: PageNavigator) =
+            let message =  
+                Var.Create Message.Empty
+
             let cred = 
                 Var.Create 
                     { UserId = ""
@@ -118,21 +127,41 @@ module Auth =
                     
             form
                 [ h3 [ text "Log in" ]
+                  message.View |> Message.Embbed
                   Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "UserId" ] (cred.Lens (fun x -> x.UserId) (fun x n -> { x with UserId = n }))
                   Doc.Input [ attr.``class`` "form-control my-3"; attr.placeholder "Password"; attr.``type`` "password" ] (cred.Lens (fun x -> x.Password) (fun x n -> { x with Password = n }))
-                  Doc.Button "Log In" [ attr.``class`` "btn btn-primary"; attr.style "submit" ] (fun () -> Service.login cred.Value) ]
+                  Doc.Button 
+                    "Log In" 
+                    [ attr.``class`` "btn btn-primary"; attr.style "submit" ] 
+                    (fun () -> 
+                        async {
+                            let! token = Service.getToken cred.Value
+                            match token with
+                            | GetTokenResult.Success token ->
+                                TokenStorage.set token
+                                navigator.GoHome()
+                            | GetTokenResult.Failure _ ->
+                                message.Value <- Message.Failure "Log in failed."
+                        } |> Async.StartImmediate) ]
 
-        let page()=
+        let page (navigator: PageNavigator) =
             divAttr
                 [ attr.``class`` "container" ]
                 [ divAttr
-                    [ attr.``class`` "card my-3" ]
-                    [ divAttr
-                        [ attr.``class`` "card-block" ]
-                        [ login() ] ]
-                        
-                  divAttr
-                    [ attr.``class`` "card my-3" ]
-                    [ divAttr
-                        [ attr.``class`` "card-block" ]
-                        [ register() ] ] ]
+                    [ attr.``class`` "row" ]
+                    [ divAttr  
+                        [ attr.``class`` "col-sm-6" ]
+                        [ divAttr
+                            [ attr.``class`` "card my-3" ]
+                            [ divAttr
+                                [ attr.``class`` "card-block" ]
+                                [ login navigator ] ] ]
+                      divAttr  
+                        [ attr.``class`` "col-sm-6" ]
+                        [ divAttr
+                            [ attr.``class`` "card my-3" ]
+                            [ divAttr
+                                [ attr.``class`` "card-block" ]
+                                [ register() ] ] ] ] ]
+                    
+                    

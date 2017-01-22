@@ -19,21 +19,30 @@ module Index =
 
     let page() =
         
-        RouteMap.Create 
-            (
-                function 
-                | Auth -> [ "auth" ] 
-                | Home -> [ "home" ]
-            ) 
-            (
-                function 
-                | [ "auth" ] -> Auth 
-                | [ "home" ] -> Home | _ -> Home
-            )
-        |> RouteMap.Install
+        let route =
+            RouteMap.Create 
+                (
+                    function 
+                    | Auth -> [ "auth" ] 
+                    | Home -> [ "home" ]
+                ) 
+                (
+                    function 
+                    | [ "auth" ] -> Auth 
+                    | [ "home" ] -> Home | _ -> Home
+                )
+            |> RouteMap.Install
+
+        let navigator =
+            { 
+                GoHome = fun () -> route.Value <- Home
+                GoAuth = fun () -> route.Value <- Auth
+            }
+
+        route
         |> View.FromVar
         |> Doc.BindView (
             function
-            | Auth -> Website.Auth.Client.page() 
-            | Home -> Website.Home.Client.page()
+            | Auth -> Website.Auth.Client.page navigator
+            | Home -> Website.Home.Client.page navigator
         )

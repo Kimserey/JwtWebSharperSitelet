@@ -14,9 +14,24 @@ module Home =
     [<JavaScript>]
     module Client =
 
-        let page() =
-        
+        let page (navigator: PageNavigator) =
+            
+            match TokenStorage.get() with
+            | Some token -> ()
+            | None -> 
+                TokenStorage.clear()
+                navigator.GoAuth()
+
             divAttr 
-                [ attr.``class`` "container" ] 
-                [ text  "Welcome! You successfuly logged in" 
-                  Doc.Button "Log out" [ attr.``class`` "btn btn-primary" ] (fun () -> ()) ]
+                [ attr.``class`` "container my-3" ] 
+                [ h1Attr [ attr.``class`` "display-3" ]  [ text "Welcome!" ]
+                  pAttr [ attr.``class`` "lead" ] [ text "You successfuly logged in" ]
+                  hrAttr [ attr.``class`` "my-4" ] []
+                  pAttr 
+                    [ attr.``class`` "lead" ]
+                    [ Doc.Button 
+                        "Log out" 
+                        [ attr.``class`` "btn btn-primary" ] 
+                        (fun () -> 
+                            TokenStorage.clear()
+                            navigator.GoAuth()) ] ]
