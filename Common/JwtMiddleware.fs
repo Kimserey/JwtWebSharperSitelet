@@ -99,6 +99,7 @@ type private JwtAuthenticationHandler() =
                     let token = JwtToken.generate self.Options.PrivateKey principal  (DateTime.UtcNow.AddMinutes(self.Options.TokenLifeSpanInMinutes))
                     use writer = new StreamWriter(self.Response.Body)
                     self.Response.StatusCode <- 200
+                    self.Response.ContentType <- "text/plain"
                     writer.WriteLine(token)
                     Task.FromResult(true)
                 | AuthenticateResult.Failure ->

@@ -10,9 +10,16 @@ module Remoting =
 
     let private originalProvider = WebSharper.Remoting.AjaxProvider
 
+    let getToken() =
+        Some ""
+
     type CustomXhrProvider () =
         member this.AddHeaders(headers) =
-            JS.Set headers "Authorization" "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb20ua2ltc2VyZXkiLCJzdWIiOiJzb21lX3VzZXIiLCJleHAiOiIyMDE2LTEyLTE0VDIzOjUzOjQxLjA0NTA3OThaIiwiaWF0IjoiMjAxNi0xMi0xNFQyMzo1MTo0MS4wNDUwNzk4WiIsImp0aSI6IjJmMDhlZTAxMDgwNjQ5NzdhMjE5Yjk0NmNiNWU0YWJkIn0.UsRwXaqKrnIENQFw6jp78P79u1R-caGg-NnldvoK0I0"
+            getToken()
+            |> Option.iter (fun token ->
+                JS.Set headers "Authorization" <| sprintf "Bearer %s" token
+            )
+
             headers
 
         interface WebSharper.Remoting.IAjaxProvider with

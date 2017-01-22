@@ -81,8 +81,9 @@
     <Compile Include="Rpcs.fs" />
     <Compile Include="Remote.fs" />
     <Compile Include="Pages.Home.fs" />
-    <Compile Include="Pages.Register.fs" />
+    <Compile Include="Pages.Auth.fs" />
     <Compile Include="Pages.Logs.fs" />
+    <Compile Include="Pages.Index.fs" />
     <Compile Include="Website.fs" />
     <Compile Include="EntryPoint.fs" />
     <Content Include="Main.html" />

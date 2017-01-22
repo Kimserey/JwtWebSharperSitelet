@@ -16,8 +16,7 @@ open Website
 type MainTemplate = Templating.Template<"Main.html">
 
 type Endpoint =
-| [<EndPoint "GET /">] Home
-| [<EndPoint "GET /register">] Register
+| [<EndPoint "GET /">] Index
 | [<EndPoint "GET /logs">] Logs
 | [<EndPoint "GET /logevents">] LogEvents
 
@@ -26,14 +25,10 @@ let sitelet =
         let logger = LogManager.GetCurrentClassLogger()
 
         match endpoint with
-        | Home -> 
+        | Index -> 
             logger.Trace "Home"
-            Content.Page(MainTemplate.Doc("Home", [ client <@ Home.page() @> ]))
-
-        | Register ->
-            logger.Trace "Register"
-            Content.Page(MainTemplate.Doc("Register", [ client <@ Register.Client.page() @> ]))
-
+            Content.Page(MainTemplate.Doc("Home", [ client <@ Website.Index.page() @> ]))
+        
         | Logs ->
             logger.Trace "Logs"
             Content.Page(MainTemplate.Doc( "Logs", [ client <@ Logs.page() @> ]))
