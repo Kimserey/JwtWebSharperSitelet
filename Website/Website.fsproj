@@ -71,10 +71,6 @@
     <Error Condition="!Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets'))" />
   </Target>
   <ItemGroup>
-    <EmbeddedResource Include="resources/css/test-embeddedres.css" />
-    <Content Include="resources/css/test-content.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Compile Include="Logger.fs" />
     <Compile Include="Navigator.fs" />
     <Compile Include="Authenticator.fs" />
